@@ -3,7 +3,7 @@
 <br></br>
 ## Integrantes:
 
-* Antônio Adilso de Souza Alves Ferreira Filho 202028211
+* Antônio Aldísio de Sousa Alves Ferreira Filho 202028211
 * Carla Rocha Cangussú 170085023
 * Guilherme Verissimo  Cerveira Braz 180018159
 
