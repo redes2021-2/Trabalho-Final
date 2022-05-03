@@ -39,6 +39,8 @@ class Client:
         receive_thread = threading.Thread(target=self.receive)
         gui_thread.start()
         receive_thread.start()
+        # self.gui_loop()
+        # self.receive()
 
     # sem funcionalidade so a interface front-end
     def gui_loop(self):
@@ -91,7 +93,8 @@ class Client:
     def stop(self):
         self.running = False    # parar loop
         self.win.destroy()      # fechar janela
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # stop thread
+        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.close()     # fechar socket
         exit()
 
@@ -120,5 +123,10 @@ class Client:
                 break
 
 
+def iniciate():
+    client = Client(HOST, PORT)
+
+
 # iniciar cliente
-client = Client(HOST, PORT)
+# client = Client(HOST, PORT)
+iniciate()

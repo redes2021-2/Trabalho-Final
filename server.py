@@ -24,11 +24,20 @@ def broadcast(message):
     # enviar mensagem para todos os clientes do grupo
     print(f'Enviando mensagem para todos os clientes do grupo {currentGroup}')
     if currentGroup in groups:
-        index = groups.index(currentGroup)
-        client = pairs[index][0]
-        print(type(client))
-        client.send(message)
+        for pair in pairs:
+            if pair[1] == currentGroup:
+                pair[0].send(message)
+        # index = groups.index(currentGroup)
+        # client = pairs[index][0]
         # client.send(message)
+        # client.send(message)
+
+
+def broadcastG(message):
+    # enviar mensagem para todos os clientes
+    print(f'Enviando mensagem para todos os clientes')
+    for client in clients:
+        client.send(message)
 
 # funcao para tratar as mensagens
 
@@ -64,6 +73,12 @@ def handle(client):
 
 def receive():
     while True:
+        print('Lista de clientes:')
+        print(nicknames)
+        print('Lista de grupos:')
+        print(groups)
+        print('Lista de pares:')
+        print(pairs)
 
         # aceitar conexão e receber endereços
         client, adress = server.accept()
@@ -80,13 +95,17 @@ def receive():
         client.send("GROUP".encode('utf-8'))
         group = client.recv(1024).decode('utf-8')
         print(f'Grupo: {group}')
-        groups.append(group)
+        # checar se o grupo existe
+        if group not in groups:
+            groups.append(group)
+
+        # check se o par existe
+        if (client, group) not in pairs:
+            # adicionar par cliente/grupo a lista de pares
+            pairs.append((client, group))
 
         global currentGroup  # declarar como global
         currentGroup = group
-
-        # adicionar par cliente/grupo a lista de pares
-        pairs.append((client, group))
 
         print(f'Usuario {nickname} foi adicionado a lista')  # print log
         # enviar mensagem de entrada para todos os clientes
