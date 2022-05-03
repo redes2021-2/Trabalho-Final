@@ -14,11 +14,28 @@ server.listen(5)
 
 clients = []
 nicknames = []
+groups = []
+pairs = []
 
 # funcao para enviar mensagens para todos os clientes
 
 
 def broadcast(message):
+    # enviar mensagem para todos os clientes do grupo
+    print(f'Enviando mensagem para todos os clientes do grupo {currentGroup}')
+    if currentGroup in groups:
+        for pair in pairs:
+            if pair[1] == currentGroup:
+                pair[0].send(message)
+        # index = groups.index(currentGroup)
+        # client = pairs[index][0]
+        # client.send(message)
+        # client.send(message)
+
+
+def broadcastG(message):
+    # enviar mensagem para todos os clientes
+    print(f'Enviando mensagem para todos os clientes')
     for client in clients:
         client.send(message)
 
@@ -41,11 +58,27 @@ def handle(client):
             client.close()                  # fechar conexão
             nickname = nicknames[index]     # pegar apelido do cliente
             nicknames.remove(nickname)      # remover apelido da lista
+
+            # achar par do cliente e remover
+            for pair in pairs:
+                if pair[0] == client:
+                    pairs.remove(pair)
+            # checar se tem grupo sem par
+            for group in groups:
+                if group not in [pair[1] for pair in pairs]:
+                    groups.remove(group)
+
             break
 
 
 def receive():
     while True:
+        print('Lista de clientes:')
+        print(nicknames)
+        print('Lista de grupos:')
+        print(groups)
+        print('Lista de pares:')
+        print(pairs)
 
         # aceitar conexão e receber endereços
         client, adress = server.accept()
@@ -57,6 +90,22 @@ def receive():
         print(f'Apelido: {nickname}')
         nicknames.append(nickname)
         clients.append(client)
+
+        # pegar grupo do cliente e adicionar a lista de grupos
+        client.send("GROUP".encode('utf-8'))
+        group = client.recv(1024).decode('utf-8')
+        print(f'Grupo: {group}')
+        # checar se o grupo existe
+        if group not in groups:
+            groups.append(group)
+
+        # check se o par existe
+        if (client, group) not in pairs:
+            # adicionar par cliente/grupo a lista de pares
+            pairs.append((client, group))
+
+        global currentGroup  # declarar como global
+        currentGroup = group
 
         print(f'Usuario {nickname} foi adicionado a lista')  # print log
         # enviar mensagem de entrada para todos os clientes

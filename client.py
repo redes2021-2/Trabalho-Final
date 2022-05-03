@@ -24,8 +24,13 @@ class Client:
         msg = tkinter.Tk()
         msg.withdraw()
 
+        # pedir nickname
         self.nickname = simpledialog.askstring(
             "Nickname", "Escolha seu apelido:")
+        # pedir grupo
+        self.group = simpledialog.askstring(
+            "Group", "Escolha seu grupo:")
+
         self.gui_done = False
         self.running = True
 
@@ -34,6 +39,8 @@ class Client:
         receive_thread = threading.Thread(target=self.receive)
         gui_thread.start()
         receive_thread.start()
+        # self.gui_loop()
+        # self.receive()
 
     # sem funcionalidade so a interface front-end
     def gui_loop(self):
@@ -44,7 +51,8 @@ class Client:
         self.win.geometry("400x400")
 
         # input text
-        self.chat_label = tkinter.Label(self.win, text="Chat", bg='lightblue')
+        self.chat_label = tkinter.Label(
+            self.win, text=self.group, bg='lightblue')
         self.chat_label.configure(font=("Courier", 12))
         self.chat_label.pack(padx=20, pady=5)
 
@@ -85,6 +93,8 @@ class Client:
     def stop(self):
         self.running = False    # parar loop
         self.win.destroy()      # fechar janela
+        # stop thread
+        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.close()     # fechar socket
         exit()
 
@@ -95,6 +105,9 @@ class Client:
                 if message == 'NICK':
                     self.socket.send(self.nickname.encode(
                         'utf-8'))  # enviar nickname
+                elif message == 'GROUP':
+                    self.socket.send(self.group.encode(
+                        'utf-8'))   # enviar grupo
                 else:
                     if self.gui_done:
                         # adicionar mensagem ao chat
@@ -110,5 +123,10 @@ class Client:
                 break
 
 
+def iniciate():
+    client = Client(HOST, PORT)
+
+
 # iniciar cliente
-client = Client(HOST, PORT)
+# client = Client(HOST, PORT)
+iniciate()
