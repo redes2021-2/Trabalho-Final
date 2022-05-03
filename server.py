@@ -1,5 +1,6 @@
 import socket
 import threading
+from tkinter import simpledialog
 
 # Declarar ip host e porta
 HOST = '127.0.0.1'
@@ -15,22 +16,35 @@ server.listen(5)
 clients = []
 nicknames = []
 groups = []
+sizes = []
 pairs = []
+# para enviar para lista na GUI
+# clientsInGroup = []
+
+
+def getTotalClientsGroup(group):
+    total = 0
+    for pair in pairs:
+        if pair[1] == group:
+            total += 1
+    return total
 
 # funcao para enviar mensagens para todos os clientes
 
 
 def broadcast(message):
+    clientsInGroup = []
     # enviar mensagem para todos os clientes do grupo
     print(f'Enviando mensagem para todos os clientes do grupo {currentGroup}')
     if currentGroup in groups:
         for pair in pairs:
             if pair[1] == currentGroup:
                 pair[0].send(message)
-        # index = groups.index(currentGroup)
-        # client = pairs[index][0]
-        # client.send(message)
-        # client.send(message)
+                # get nickname from client
+                index = clients.index(pair[0])
+                nickname = nicknames[index]
+                # adiciona nickname a lista de clientes do grupos
+                # clientsInGroup.append(nickname)
 
 
 def broadcastG(message):
@@ -50,6 +64,9 @@ def handle(client):
 
             # enviar mensagem para todos os clientes
             broadcast(message)
+
+            # enviar lista de clientes para o cliente
+            # client.send(str(clientsInGroup).encode('utf-8'))
         except:
             # se o cliente sair, remove-lo da lista
 
@@ -63,10 +80,16 @@ def handle(client):
             for pair in pairs:
                 if pair[0] == client:
                     pairs.remove(pair)
+
             # checar se tem grupo sem par
-            for group in groups:
-                if group not in [pair[1] for pair in pairs]:
-                    groups.remove(group)
+            # for group in groups:
+                # if group not in [pair[1] for pair in pairs]:
+                    # groups.remove(group)
+
+            # se o total de clientes no grupo for 0, deletar grupo
+            if getTotalClientsGroup(currentGroup) == 0:
+                groups.remove(currentGroup)
+                sizes.remove(size[groups.index(currentGroup)])
 
             break
 
@@ -95,17 +118,54 @@ def receive():
         client.send("GROUP".encode('utf-8'))
         group = client.recv(1024).decode('utf-8')
         print(f'Grupo: {group}')
+
         # checar se o grupo existe
         if group not in groups:
             groups.append(group)
+
+            size = simpledialog.askstring(
+                "Size Group", "Escolha o tamanho do grupo:")
+            sizes.append(int(size))
+            print(f'Tamanho do grupo: {size}')
 
         # check se o par existe
         if (client, group) not in pairs:
             # adicionar par cliente/grupo a lista de pares
             pairs.append((client, group))
 
-        global currentGroup  # declarar como global
+        # declarar como global
+        global currentGroup
         currentGroup = group
+
+        # checar se o grupo ja alcançou o tamanho maximo
+        check = getTotalClientsGroup(group)
+        print('-------------------------------------------------------------------------------')
+        print(f'Total de clientes no grupo: {check}')
+        print(f'Tamanho do grupo no vetor: {sizes[groups.index(group)]}')
+        print('-------------------------------------------------------------------------------')
+
+        flag = check > sizes[groups.index(group)]
+
+        if flag:
+            print('Grupo alcançou o tamanho maximo')
+            alert = 'Grupo alcançou o tamanho maximo'
+            broadcast(alert.encode('utf-8'))
+            msg = 'MAX'
+            client.send(msg.encode('utf-8'))
+
+            # deletar cliente do grupo
+            index = clients.index(client)   # pegar indice do cliente
+            clients.remove(client)          # remover cliente da lista
+            client.close()                  # fechar conexão
+            nickname = nicknames[index]     # pegar apelido do cliente
+            nicknames.remove(nickname)      # remover apelido da lista
+
+            # achar par do cliente e remover
+            for pair in pairs:
+                if pair[0] == client:
+                    pairs.remove(pair)
+
+            break
 
         print(f'Usuario {nickname} foi adicionado a lista')  # print log
         # enviar mensagem de entrada para todos os clientes

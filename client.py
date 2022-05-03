@@ -31,6 +31,7 @@ class Client:
         self.group = simpledialog.askstring(
             "Group", "Escolha seu grupo:")
 
+        # self.clientes = []
         self.gui_done = False
         self.running = True
 
@@ -71,6 +72,10 @@ class Client:
         self.input_text.configure(font=("Courier", 12))
         self.input_text.pack(padx=20, pady=5)
 
+        # top botton to vizualizar lista de clientes
+        # self.lista_button = tkinter.Button(
+        # self.win, text="Lista de Clientes", command=self.lista)
+
         # botao para enviar mensagem
         self.send_button = tkinter.Button(
             self.win, text="Enviar", command=self.write)
@@ -108,6 +113,16 @@ class Client:
                 elif message == 'GROUP':
                     self.socket.send(self.group.encode(
                         'utf-8'))   # enviar grupo
+                # elif message[0] == '[':
+                    # adicionar clientes na lista
+                    # self.clientes = message.split(',')
+                    # print(self.clientes)
+                elif message == 'MAX':
+                    # adicionar mensagem ao chat
+                    self.chat_text.config(state='normal')
+                    self.chat_text.insert('end', message + '\n')
+                    self.chat_text.yview('end')
+                    self.chat_text.config(state='disabled')
                 else:
                     if self.gui_done:
                         # adicionar mensagem ao chat
@@ -121,6 +136,14 @@ class Client:
                 print("Error")
                 self.sock.close()   # fechar socket
                 break
+
+    # def lista(self):
+        # mostrar na tela a lista de clientes
+        # self.chat_text.config(state='normal')
+        # self.chat_text.insert('end', self.clientes)
+        # self.chat_text.yview('end')
+        # self.chat_text.config(state='disabled')
+        # print(self.clientes)
 
 
 def iniciate():
