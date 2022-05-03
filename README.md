@@ -1,5 +1,16 @@
 # Trabalho-Final
 
+## Como rodar
+
+```
+python server.py
+```
+
+```
+python client.py
+```
+
+
 <br></br>
 ## Integrantes:
 
